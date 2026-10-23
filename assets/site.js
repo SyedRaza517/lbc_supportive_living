@@ -360,7 +360,32 @@
       if (files) rows.push(['Files to send', files]);
       var init = $('#rf-initials').value.trim(), la = $('#rf-la').value.trim();
       mailModal('Referral: ' + init + (la ? ' (' + la + ')' : ''), rows, 'Your email app will open with the referral. Please attach the documents, or send them separately by secure email. If your email does not open, copy the text and send it to ' + EMAIL + '.');
+      draft(null); if (draftNote) draftNote.textContent = '';
     });
+
+    /* Unsent draft, kept for this browser tab only (sessionStorage), never the declaration or files */
+    var DRAFT = 'lbc-referral-draft', draftNote = document.createElement('span');
+    draftNote.className = 'draft-note'; draftNote.setAttribute('aria-live', 'polite');
+    cnt.parentNode.insertBefore(draftNote, cnt.nextSibling);
+    function draft(v) { try { if (v === undefined) return sessionStorage.getItem(DRAFT); if (v === null) sessionStorage.removeItem(DRAFT); else sessionStorage.setItem(DRAFT, v); } catch (e) { return null; } }
+    function draftKey(el) { return el.id || (el.name + ':' + el.value); }
+    function draftFields() { return $$('input, select, textarea', wz).filter(function (el) { return el.type !== 'file' && el.id !== 'rf-consent' && (el.id || el.name); }); }
+    var draftTimer;
+    wz.addEventListener('input', function () {
+      clearTimeout(draftTimer);
+      draftTimer = setTimeout(function () {
+        var d = {};
+        draftFields().forEach(function (el) { d[draftKey(el)] = el.type === 'checkbox' ? el.checked : el.value; });
+        draft(JSON.stringify(d)); draftNote.textContent = 'Draft saved in this tab';
+      }, 400);
+    });
+    try {
+      var draftSaved = JSON.parse(draft() || 'null');
+      if (draftSaved) {
+        draftFields().forEach(function (el) { var k = draftKey(el); if (!(k in draftSaved)) return; if (el.type === 'checkbox') el.checked = !!draftSaved[k]; else el.value = draftSaved[k]; });
+        draftNote.textContent = 'Unsent draft restored';
+      }
+    } catch (e) {}
     wGo(0);
   }
 
@@ -432,11 +457,17 @@
 
   /* ---------- Accessibility toolbar ---------- */
   var root = document.documentElement, a11yBtn = $('#a11yBtn'), a11yPanel = $('#a11yPanel');
-  var A = { size: 100, hc: false, ul: false, spaced: false };
+  var A = { size: 100, hc: false, ul: false, spaced: false, theme: '' };
   try { var saved = JSON.parse(store('lbc-a11y') || 'null'); if (saved) A = Object.assign(A, saved); } catch (e) {}
+  function isDark() {
+    if (A.theme) return A.theme === 'dark';
+    try { return window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) { return false; }
+  }
   function applyA11y() {
     root.style.fontSize = A.size === 100 ? '' : A.size + '%';
     ['hc', 'ul', 'spaced'].forEach(function (m) { root.classList.toggle(m, !!A[m]); var b = $('[data-mode="' + m + '"]'); if (b) b.setAttribute('aria-pressed', String(!!A[m])); });
+    if (A.theme) root.setAttribute('data-theme', A.theme); else root.removeAttribute('data-theme');
+    var tb = $('#themeToggle'); if (tb) tb.setAttribute('aria-pressed', String(isDark()));
     store('lbc-a11y', JSON.stringify(A));
   }
   function togglePanel(btn, panel, open) {
@@ -444,12 +475,20 @@
     panel.hidden = !open; btn.setAttribute('aria-expanded', String(open));
   }
   if (a11yBtn) {
+    var a11yGrid = $('.a11y-grid', a11yPanel);
+    if (a11yGrid) {
+      var themeBtn = document.createElement('button');
+      themeBtn.type = 'button'; themeBtn.className = 'a11y-btn wide'; themeBtn.id = 'themeToggle';
+      themeBtn.innerHTML = '<i data-lucide="moon"></i>Dark mode';
+      a11yGrid.appendChild(themeBtn);
+      themeBtn.addEventListener('click', function () { A.theme = isDark() ? 'light' : 'dark'; applyA11y(); toast(isDark() ? 'Dark mode on' : 'Light mode on'); });
+    }
     applyA11y();
     a11yBtn.addEventListener('click', function () { togglePanel(a11yBtn, a11yPanel); if (!chatPanel.hidden) togglePanel(chatBtn, chatPanel, false); });
     $('#fontUp').addEventListener('click', function () { A.size = Math.min(140, A.size + 10); applyA11y(); toast('Text size ' + A.size + '%'); });
     $('#fontDown').addEventListener('click', function () { A.size = Math.max(90, A.size - 10); applyA11y(); toast('Text size ' + A.size + '%'); });
     $$('[data-mode]').forEach(function (b) { b.addEventListener('click', function () { var m = b.getAttribute('data-mode'); A[m] = !A[m]; applyA11y(); }); });
-    $('#a11yReset').addEventListener('click', function () { A = { size: 100, hc: false, ul: false, spaced: false }; applyA11y(); stopReading(); toast('Settings reset'); });
+    $('#a11yReset').addEventListener('click', function () { A = { size: 100, hc: false, ul: false, spaced: false, theme: '' }; applyA11y(); stopReading(); toast('Settings reset'); });
     var tl = $('#translateLink');
     if (tl && !single) tl.href = 'https://translate.google.com/translate?sl=en&tl=auto&u=' + encodeURIComponent(location.href);
   }
@@ -505,10 +544,15 @@
       if (!chatPanel.hidden) $('#chatIn').focus();
     });
     $('#chatClose').addEventListener('click', function () { togglePanel(chatBtn, chatPanel, false); chatBtn.focus(); });
-    $('#chatQuick').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; say(esc(b.textContent), 'me'); setTimeout(function () { say(answer(b.textContent)); }, 250); });
+    function reply(q) {
+      var t = document.createElement('div'); t.className = 'msg bot typing'; t.setAttribute('aria-hidden', 'true'); t.innerHTML = '<i></i><i></i><i></i>';
+      chatLog.appendChild(t); chatLog.scrollTop = chatLog.scrollHeight;
+      setTimeout(function () { chatLog.removeChild(t); say(answer(q)); }, 650);
+    }
+    $('#chatQuick').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; say(esc(b.textContent), 'me'); reply(b.textContent); });
     $('#chatForm').addEventListener('submit', function (e) {
       e.preventDefault(); var inp = $('#chatIn'), v = inp.value.trim(); if (!v) return;
-      say(esc(v), 'me'); inp.value = ''; setTimeout(function () { say(answer(v)); }, 250);
+      say(esc(v), 'me'); inp.value = ''; reply(v);
     });
     chatLog.addEventListener('click', function (e) { if (e.target.closest('a') && single) togglePanel(chatBtn, chatPanel, false); });
   }
@@ -521,6 +565,145 @@
     if (a11yPanel && !a11yPanel.hidden) { togglePanel(a11yBtn, a11yPanel, false); a11yBtn.focus(); return; }
     closeMenu();
   });
+
+  /* ---------- Header shadow, reading progress, back to top ---------- */
+  var reduceMotion = false;
+  try { reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  var siteHeader = $('.site-header');
+  var progEl = document.createElement('div'); progEl.className = 'read-progress'; progEl.setAttribute('aria-hidden', 'true');
+  var topBtn = document.createElement('button'); topBtn.type = 'button'; topBtn.className = 'to-top'; topBtn.setAttribute('aria-label', 'Back to top'); topBtn.innerHTML = '<i data-lucide="arrow-up"></i>';
+  document.body.appendChild(progEl); document.body.appendChild(topBtn);
+  topBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }); });
+  var scrollQueued = false;
+  function onScroll() {
+    scrollQueued = false;
+    var y = window.scrollY || 0, h = document.documentElement.scrollHeight - window.innerHeight;
+    progEl.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, y / h) : 0) + ')';
+    if (siteHeader) siteHeader.classList.toggle('scrolled', y > 8);
+    topBtn.classList.toggle('show', y > 600);
+  }
+  window.addEventListener('scroll', function () { if (!scrollQueued) { scrollQueued = true; requestAnimationFrame(onScroll); } }, { passive: true });
+  onScroll();
+
+  /* ---------- Scroll reveal ---------- */
+  var hasIO = 'IntersectionObserver' in window;
+  if (hasIO && !reduceMotion) {
+    var animIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var el = en.target, delay = parseInt(el.style.transitionDelay, 10) || 0;
+        el.classList.add('in'); animIO.unobserve(el);
+        // hand transitions back to the element's own hover styles once it has arrived
+        setTimeout(function () { el.removeAttribute('data-anim'); el.classList.remove('in'); el.style.transitionDelay = ''; }, 700 + delay);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    $$('main .sec-head, main .card, .svc-card, main .feature, .reveal, .story, .member, .timeline li, .steps li, .dash > div, .opp, main .dl, .job, .guide > div, .split > .ph, .day, .finder, .house-map, .gallery > div, .helplines > div, .callbox').forEach(function (el) {
+      el.setAttribute('data-anim', '');
+      el.style.transitionDelay = (Array.prototype.indexOf.call(el.parentNode.children, el) % 4) * 80 + 'ms';
+      animIO.observe(el);
+    });
+    root.classList.add('anim');
+  }
+
+  /* ---------- Count-up numbers on the outcomes dashboard ---------- */
+  $$('.dash b').forEach(function (b) {
+    var m = /^(\d+)(%?)$/.exec(b.textContent.trim());
+    if (!m || reduceMotion || !hasIO) return;
+    var target = +m[1], suffix = m[2];
+    b.textContent = '0' + suffix;
+    var countIO = new IntersectionObserver(function (en) {
+      if (!en[0].isIntersecting) return;
+      countIO.disconnect();
+      var t0 = null;
+      // animation frames pause in background tabs, so always land on the real figure
+      setTimeout(function () { b.textContent = target + suffix; }, 1500);
+      (function step(ts) {
+        if (ts === undefined) return requestAnimationFrame(step);
+        if (t0 === null) t0 = ts;
+        var p = Math.min(1, (ts - t0) / 1300);
+        b.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + suffix;
+        if (p < 1) requestAnimationFrame(step);
+      })();
+    }, { threshold: 0.4 });
+    countIO.observe(b);
+  });
+
+  /* ---------- Arrow keys move between tabs ---------- */
+  $$('[role="tablist"]').forEach(function (list) {
+    list.addEventListener('keydown', function (e) {
+      if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].indexOf(e.key) < 0) return;
+      var tabs = $$('[role="tab"]', list), i = tabs.indexOf(document.activeElement);
+      if (i < 0) return;
+      e.preventDefault();
+      var n = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+      tabs[n].focus(); tabs[n].click();
+    });
+  });
+
+  /* ---------- Highlight the current section in "On this page" links ---------- */
+  var jumpLinks = $$('.jump a[href^="#"]');
+  if (jumpLinks.length && hasIO) {
+    var spyIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        jumpLinks.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id); });
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    jumpLinks.forEach(function (a) { var s = document.getElementById(a.getAttribute('href').slice(1)); if (s) spyIO.observe(s); });
+  }
+
+  /* ---------- Slider arrows ---------- */
+  $$('.slider').forEach(function (sl) {
+    var nav = document.createElement('div'); nav.className = 'slider-arrows';
+    nav.innerHTML = '<button class="round" type="button" aria-label="Previous photo"><i data-lucide="chevron-left"></i></button><button class="round" type="button" aria-label="Next photo"><i data-lucide="chevron-right"></i></button>';
+    sl.parentNode.insertBefore(nav, sl.nextSibling);
+    $$('button', nav).forEach(function (b, i) {
+      b.addEventListener('click', function () {
+        var first = sl.firstElementChild, w = first ? first.getBoundingClientRect().width + 16 : sl.clientWidth;
+        sl.scrollBy({ left: (i ? 1 : -1) * w, behavior: reduceMotion ? 'auto' : 'smooth' });
+      });
+    });
+  });
+
+  /* ---------- Photo lightbox (gallery and slider) ---------- */
+  var lbImgs = $$('[data-gallery] img, .slider img'), lb = null;
+  function lbHtml() {
+    var im = lb.list[lb.i], cap = im.closest('figure') && $('figcaption', im.closest('figure'));
+    return '<div class="lightbox"><figure class="ph"><img src="' + im.getAttribute('src') + '" alt="' + esc(im.alt) + '"></figure><div class="lb-bar"><div><b id="modalTitle">' + esc(im.alt) + '</b>' +
+      '<div class="tiny muted">' + (cap ? esc(cap.textContent) + ' · ' : '') + (lb.i + 1) + ' of ' + lb.list.length + '</div></div>' +
+      (lb.list.length > 1 ? '<div class="row"><button class="round" type="button" data-lb="-1" aria-label="Previous photo"><i data-lucide="chevron-left"></i></button><button class="round" type="button" data-lb="1" aria-label="Next photo"><i data-lucide="chevron-right"></i></button></div>' : '') + '</div></div>';
+  }
+  function lbMove(d) {
+    lb.i = (lb.i + d + lb.list.length) % lb.list.length;
+    modalContent.innerHTML = lbHtml(); icons();
+    var b = $('[data-lb="' + d + '"]', modalContent); if (b) b.focus();
+  }
+  function openLightbox(img) {
+    var list = lbImgs.filter(function (x) { return x.offsetParent !== null; });
+    lb = { list: list.length ? list : [img], i: Math.max(0, list.indexOf(img)) };
+    openModal(lbHtml(), 'Photo viewer');
+  }
+  lbImgs.forEach(function (img) {
+    img.classList.add('zoomable'); img.tabIndex = 0; img.setAttribute('role', 'button'); img.setAttribute('aria-label', 'Enlarge photo: ' + img.alt);
+    img.addEventListener('click', function () { openLightbox(img); });
+    img.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(img); } });
+  });
+  modalContent.addEventListener('click', function (e) { var b = e.target.closest('[data-lb]'); if (b && lb) lbMove(+b.getAttribute('data-lb')); });
+  document.addEventListener('keydown', function (e) {
+    if (modal.hidden || !lb || !$('.lightbox', modalContent)) return;
+    if (e.key === 'ArrowRight') lbMove(1); else if (e.key === 'ArrowLeft') lbMove(-1);
+  });
+
+  /* ---------- Quick exit on pages written for young people ---------- */
+  var pageId = (pages[0] && pages[0].id) || '';
+  if (!single && (pageId === 'young-people' || /^yp-/.test(pageId))) {
+    var qx = document.createElement('button');
+    qx.type = 'button'; qx.className = 'quick-exit'; qx.title = 'Leave this website quickly';
+    qx.setAttribute('aria-label', 'Quick exit: leave this website now');
+    qx.innerHTML = '<i data-lucide="log-out"></i>Quick exit';
+    document.body.appendChild(qx);
+    qx.addEventListener('click', function () { document.body.style.visibility = 'hidden'; location.replace('https://www.bbc.co.uk/weather'); });
+  }
 
   if (single) route();
   icons();
