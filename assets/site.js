@@ -104,7 +104,7 @@
     var body = rows.map(function (r) { return r[0] + ': ' + r[1]; }).join('\n');
     var href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
     var text = 'To: ' + EMAIL + '\nSubject: ' + subject + '\n\n' + body;
-    openModal('<div class="modal-body" style="padding-top:28px"><span class="kicker">Ready to send</span><h2 id="modalTitle">' + esc(subject) + '</h2>' +
+    openModal('<div class="modal-body" style="padding-top:28px"><h2 id="modalTitle">' + esc(subject) + '</h2>' +
       '<p class="muted">' + (note || 'Your email app will open with this message. If it does not, copy the text and email it to ' + EMAIL + '.') + '</p>' +
       '<dl class="review">' + rows.map(function (r) { return '<div><dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]).replace(/\n/g, '<br>') + '</dd></div>'; }).join('') + '</dl>' +
       '<div class="row" style="margin-top:8px"><a class="btn btn-teal" href="' + href + '">Open email</a><button class="btn btn-line" type="button" data-mailcopy>Copy text</button></div></div>', subject);
@@ -202,7 +202,7 @@
 
   /* ---------- Day in the life ---------- */
   var DAY = [
-    { label: 'Morning', img: 'study', items: [['7:30', 'Wake up and make your own breakfast, with help if you want it.'], ['9:00', 'College, school or a session at the Skills and Development Centre.'], ['11:30', 'Keywork check-in to look at your goals for the week.']] },
+    { label: 'Morning', img: 'study', items: [['7:30', 'Wake up and make your own breakfast, with help if you want it.'], ['9:00', 'College, work or a session at the Skills and Development Centre.'], ['11:30', 'Keywork check-in to look at your goals for the week.']] },
     { label: 'Afternoon', img: 'bus', items: [['13:00', 'Lunch, then travel training or an appointment.'], ['14:30', 'ASDAN life skills: budgeting, shopping or a job search.'], ['16:00', 'Free time, sport or a local activity.']] },
     { label: 'Evening', img: 'kitchen', items: [['18:00', 'Cook a meal, on your own or with staff.'], ['19:30', 'Relax in the lounge, call family or friends.'], ['22:00', 'Quiet time. Staff are awake and on site all night.']] },
     { label: 'Weekend', img: 'garden', items: [['10:00', 'Lie-in, laundry and tidying your room.'], ['13:00', 'Trips out, the gym, a place of worship or time with family.'], ['18:00', 'House meeting or a shared meal.']] }
@@ -224,11 +224,11 @@
 
   /* ---------- Success stories (examples until real stories are added) ---------- */
   var STORIES = [
-    { cat: 'independence', tag: 'Independence', img: 'kitchen', name: 'Example: J, 17', challenge: 'Had never cooked or managed money.', support: 'Weekly cooking sessions and a budgeting plan with a keyworker.', progress: 'Cooks most evening meals and manages a weekly budget.', outcome: 'Moved on to a semi-independent flat.', quote: 'I can actually look after myself now.' },
-    { cat: 'education', tag: 'Education', img: 'study', name: 'Example: A, 16', challenge: 'Out of education for a year.', support: 'Functional Skills at the Skills and Development Centre, then help enrolling at college.', progress: 'Passed Functional Skills English and Maths.', outcome: 'Started a college course.', quote: 'I didn’t think college was for me.' },
+    { cat: 'independence', tag: 'Independence', img: 'kitchen', name: 'Example: J, 19', challenge: 'Had never cooked or managed money.', support: 'Weekly cooking sessions and a budgeting plan with a keyworker.', progress: 'Cooks most evening meals and manages a weekly budget.', outcome: 'Moved on to a semi-independent flat.', quote: 'I can actually look after myself now.' },
+    { cat: 'education', tag: 'Education', img: 'study', name: 'Example: A, 20', challenge: 'Out of education for a year.', support: 'Functional Skills at the Skills and Development Centre, then help enrolling at college.', progress: 'Passed Functional Skills English and Maths.', outcome: 'Started a college course.', quote: 'I didn’t think college was for me.' },
     { cat: 'employment', tag: 'Employment', img: 'keyworker', name: 'Example: M, 18', challenge: 'No work experience and low confidence.', support: 'CV writing, mock interviews and a volunteering placement.', progress: 'Completed three months of volunteering.', outcome: 'First part-time job.', quote: 'Getting that first payslip felt amazing.' },
-    { cat: 'life-skills', tag: 'Life skills', img: 'bus', name: 'Example: R, 17', challenge: 'Anxious about travelling alone.', support: 'Step-by-step travel training around Hendon and central London.', progress: 'Travels independently to college and appointments.', outcome: 'Plans their own trips.', quote: 'I know my routes now.' },
-    { cat: 'mental-health', tag: 'Mental health', img: 'garden', name: 'Example: S, 16', challenge: 'Struggling with low mood after a placement breakdown.', support: 'A consistent keyworker, gardening, and help accessing therapy.', progress: 'Attends appointments and joins house activities.', outcome: 'Feels settled and has clear goals.', quote: 'Someone was always there to talk to.' },
+    { cat: 'life-skills', tag: 'Life skills', img: 'bus', name: 'Example: R, 19', challenge: 'Anxious about travelling alone.', support: 'Step-by-step travel training around Hendon and central London.', progress: 'Travels independently to college and appointments.', outcome: 'Plans their own trips.', quote: 'I know my routes now.' },
+    { cat: 'mental-health', tag: 'Mental health', img: 'garden', name: 'Example: S, 21', challenge: 'Struggling with low mood after a placement breakdown.', support: 'A consistent keyworker, gardening, and help accessing therapy.', progress: 'Attends appointments and joins house activities.', outcome: 'Feels settled and has clear goals.', quote: 'Someone was always there to talk to.' },
     { cat: 'independence', tag: 'Independence', img: 'bedroom', name: 'Example: T, 18', challenge: 'Needed support with routines and appointments.', support: 'A visual planner and regular keywork reviews.', progress: 'Manages own appointments and room.', outcome: 'Ready for a planned move on.', quote: 'I sorted everything for my move myself.' }
   ];
   function storyCard(s) {
@@ -253,9 +253,9 @@
 
   /* ---------- Service finder ---------- */
   var FQ = [
-    { q: 'How old is the young person?', key: 'age', o: [['u16', 'Under 16', 'baby'], ['16-17', '16 or 17', 'user-round'], ['18+', '18 or over', 'user-round-check'], ['unsure', 'Not sure', 'help-circle']] },
+    { q: 'How old is the person?', key: 'age', o: [['18-24', '18 to 24', 'user-round'], ['25+', '25 or over', 'user-round-check'], ['u18', 'Under 18', 'user-x'], ['unsure', 'Not sure', 'help-circle']] },
     { q: 'What is the main support need?', key: 'need', o: [['skills', 'Independent living skills', 'chef-hat'], ['edu', 'Education or training', 'graduation-cap'], ['mh', 'Emotional wellbeing', 'heart-handshake'], ['ld', 'Learning disability', 'puzzle']] },
-    { q: 'Where is the young person now?', key: 'loc', o: [['barnet', 'Barnet or North London', 'map-pin'], ['london', 'Elsewhere in London', 'building-2'], ['outside', 'Outside London', 'map'], ['unsure', 'Not sure', 'help-circle']] },
+    { q: 'Where is the person now?', key: 'loc', o: [['barnet', 'Barnet or North London', 'map-pin'], ['london', 'Elsewhere in London', 'building-2'], ['outside', 'Outside London', 'map'], ['unsure', 'Not sure', 'help-circle']] },
     { q: 'What type of placement is needed?', key: 'type', o: [['planned', 'Planned move', 'calendar-check'], ['emergency', 'Emergency', 'siren'], ['step', 'Step-down from residential', 'trending-down'], ['unsure', 'Not sure yet', 'help-circle']] }
   ];
   var finder = $('[data-finder]');
@@ -274,11 +274,11 @@
     }
     function fResult() {
       var title, why = [], next = '';
-      if (ans.age === 'u16') {
-        title = 'Talk to us first';
-        why.push('Our home is for young people preparing for independence. We can tell you quickly if we can help or suggest where to look.');
+      if (ans.age === 'u18') {
+        title = 'We support adults aged 18 and over';
+        why.push('We are not able to accept referrals for anyone under 18. Call us and we will try to point you to the right service.');
       } else {
-        var semi = ans.age === '18+' || ans.need === 'skills';
+        var semi = ans.age === '25+' || ans.need === 'skills';
         title = semi ? 'Semi-independent living' : 'Supported living';
         if (ans.need === 'edu') why.push('Education support from our on-site Skills and Development Centre and links with local colleges.');
         if (ans.need === 'mh') why.push('A consistent named keyworker, coaching and help to access health and therapy services.');
@@ -286,7 +286,7 @@
         if (ans.need === 'skills') why.push('ASDAN-accredited life skills: cooking, budgeting, shopping and travel training.');
         why.push('Staff on site 24 hours a day and an individual support plan.');
       }
-      if (ans.loc === 'outside' || ans.loc === 'london') why.push('Our home is in Hendon, North West London. We can talk through whether a placement here fits the young person’s plan.');
+      if (ans.loc === 'outside' || ans.loc === 'london') why.push('Our home is in Hendon, North West London. We can talk through whether a placement here fits the person’s plan.');
       if (ans.type === 'emergency') next = '<p><b style="color:#fff">For an emergency placement, call ' + PHONE + ' now.</b></p>';
       fres.innerHTML = '<span class="q-step" style="color:var(--marker)">Suggested service</span><h3>' + title + '</h3><ul>' + why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>' + next +
         '<p class="tiny">A guide only. We confirm suitability through assessment.</p><div class="row"><a class="btn btn-warm btn-sm" href="' + (single ? '#refer-form' : 'referrals.html#refer-form') + '">Make a referral</a><a class="btn btn-line btn-sm" style="border-color:#fff;color:#fff" href="tel:+442082596298">Call us</a></div>';
@@ -300,16 +300,16 @@
   var ROOMS = {
     bed1: ['Bedroom 1', 'bedroom', 'A private en-suite room with a bed, desk, storage and space to make it your own.'],
     bed2: ['Bedroom 2', 'bedroom', 'Every one of the eight bedrooms has its own en-suite bathroom.'],
-    bed3: ['Bedroom 3', 'bedroom', 'Rooms are decorated with the young person, so they feel like home.'],
+    bed3: ['Bedroom 3', 'bedroom', 'Rooms are decorated with the person, so they feel like home.'],
     lounge: ['Lounge', 'lounge', 'The communal living area for films, games, house meetings and time together.'],
-    kitchen: ['Kitchen and dining', 'kitchen', 'Where cooking sessions happen. Young people learn to plan, shop for and cook meals.'],
+    kitchen: ['Kitchen and dining', 'kitchen', 'Where cooking sessions happen. People learn to plan, shop for and cook meals.'],
     activity: ['Activity room', 'study', 'Used for learning, homework, ASDAN sessions and hobbies.'],
     garden: ['Garden', 'garden', 'A fenced and gated garden for relaxing, growing food and fresh air.']
   };
   function showRoom(k) {
     var r = ROOMS[k]; if (!r) return;
     $$('.room').forEach(function (g) { g.classList.toggle('active', g.getAttribute('data-room') === k); });
-    openModal(photo(r[1]) + '<div class="modal-body"><span class="kicker">79 Watford Way</span><h2 id="modalTitle">' + r[0] + '</h2><p class="muted">' + r[2] + '</p><p class="tiny muted">Stock photograph until photos of the home are ready.</p></div>', r[0]);
+    openModal(photo(r[1]) + '<div class="modal-body"><h2 id="modalTitle">' + r[0] + '</h2><p class="muted">' + r[2] + '</p><p class="tiny muted">Stock photograph until photos of the home are ready.</p></div>', r[0]);
   }
   $$('[data-room]').forEach(function (el) {
     el.addEventListener('click', function () { showRoom(el.getAttribute('data-room')); });
@@ -389,7 +389,7 @@
     wGo(0);
   }
 
-  /* ---------- Young people: opportunities + weekly timetable ---------- */
+  /* ---------- People: opportunities + weekly timetable ---------- */
   var OPPS = {
     education: ['Education', 'study', 'Work towards GCSEs, Functional Skills or ASDAN awards at our Skills and Development Centre, or get help with college.'],
     independence: ['Independence', 'bedroom', 'Your own en-suite room, your own routines, and support that steps back as you grow in confidence.'],
@@ -403,7 +403,7 @@
   $$('[data-opp]').forEach(function (b) {
     b.addEventListener('click', function () {
       var o = OPPS[b.getAttribute('data-opp')];
-      openModal(photo(o[1]) + '<div class="modal-body"><span class="kicker">Opportunities</span><h2 id="modalTitle">' + o[0] + '</h2><p class="muted">' + o[2] + '</p><p>Ask your keyworker to add it to your plan.</p></div>', o[0]);
+      openModal(photo(o[1]) + '<div class="modal-body"><h2 id="modalTitle">' + o[0] + '</h2><p class="muted">' + o[2] + '</p><p>Ask your keyworker to add it to your plan.</p></div>', o[0]);
     });
   });
   var WEEK = [
@@ -424,9 +424,9 @@
 
   /* ---------- Careers (example roles until real ones are added) ---------- */
   var JOBS = [
-    { title: 'Support Worker', type: 'Full time', hours: 'Days and evenings, rota', text: 'Help young people with daily living, education and goals.' },
-    { title: 'Night Support Worker', type: 'Full time', hours: 'Waking nights', text: 'Keep the home safe overnight and support young people when they need it.' },
-    { title: 'Keyworker', type: 'Full time', hours: 'Rota', text: 'Lead support plans for named young people using the GROW model.' },
+    { title: 'Support Worker', type: 'Full time', hours: 'Days and evenings, rota', text: 'Help people with daily living, education and goals.' },
+    { title: 'Night Support Worker', type: 'Full time', hours: 'Waking nights', text: 'Keep the home safe overnight and support people when they need it.' },
+    { title: 'Keyworker', type: 'Full time', hours: 'Rota', text: 'Lead support plans for named service users using the GROW model.' },
     { title: 'Bank Support Worker', type: 'Bank', hours: 'Flexible', text: 'Cover shifts when it suits you.' }
   ];
   var jobsBox = $('[data-jobs]');
@@ -514,10 +514,11 @@
     { k: ['bedroom', 'house', 'accommodation', 'en-suite', 'ensuite', 'garden'], a: function () { return 'The home has eight en-suite bedrooms, a lounge, kitchen and dining room, activity room and a gated garden. <a href="' + L('accommodation', 'house-map') + '">Explore the house</a>.'; } },
     { k: ['school', 'college', 'education', 'asdan', 'gcse', 'learn'], a: function () { return 'We have an on-site Skills and Development Centre and offer ASDAN-accredited courses. <a href="' + L('services', 'education') + '">Education support</a>.'; } },
     { k: ['job', 'career', 'work for', 'vacancy job', 'apply'], a: function () { return 'See our <a href="' + L('careers', 'vacancies') + '">careers page</a> for roles, or send us your CV.'; } },
-    { k: ['family', 'parent', 'mum', 'dad', 'carer'], a: function () { return 'Families are welcome to stay involved where it is right for the young person. <a href="' + L('families') + '">Information for families</a>.'; } },
+    { k: ['family', 'parent', 'mum', 'dad', 'carer'], a: function () { return 'Families are welcome to stay involved where it is right for the person. <a href="' + L('families') + '">Information for families</a>.'; } },
     { k: ['document', 'policy', 'statement of purpose', 'brochure', 'pdf'], a: function () { return 'We can email you our Statement of Purpose and policies. <a href="' + L('about', 'policies') + '">Request a document</a>.'; } },
-    { k: ['danger', 'emergency', 'unsafe', 'hurt', 'help me', 'scared'], a: function () { return '<b>If you or someone else is in danger, call 999 now.</b> You can also call Childline free on 0800 1111, or us on ' + PHONE + ' at any time.'; } },
-    { k: ['night', '24', 'staff', 'support'], a: function () { return 'Staff are on site 24 hours a day, every day, and every young person has a named keyworker.'; } },
+    { k: ['danger', 'emergency', 'unsafe', 'hurt', 'help me', 'scared'], a: function () { return '<b>If you or someone else is in danger, call 999 now.</b> You can also call Samaritans free on 116 123, day or night, or us on ' + PHONE + ' at any time.'; } },
+    { k: ['night', '24', 'staff', 'support'], a: function () { return 'Staff are on site 24 hours a day, every day, and every person has a named keyworker.'; } },
+    { k: ['office', 'opening', 'hours', 'open'], a: function () { return 'Our office is open Monday to Friday, 9am to 5pm. Support staff are on site 24 hours a day, every day.'; } },
     { k: ['contact', 'phone', 'call', 'email', 'number'], a: function () { return 'Call ' + PHONE + ' (24 hours), mobile 07760 348767 or 07723 126345, or email ' + EMAIL + '.'; } }
   ];
   var QUICK = ['How do I refer?', 'Any vacancies?', 'Book a visit', 'Where are you?', 'Jobs'];
@@ -694,7 +695,7 @@
     if (e.key === 'ArrowRight') lbMove(1); else if (e.key === 'ArrowLeft') lbMove(-1);
   });
 
-  /* ---------- Quick exit on pages written for young people ---------- */
+  /* ---------- Quick exit on the service users pages ---------- */
   var pageId = (pages[0] && pages[0].id) || '';
   if (!single && (pageId === 'young-people' || /^yp-/.test(pageId))) {
     var qx = document.createElement('button');
@@ -704,6 +705,62 @@
     document.body.appendChild(qx);
     qx.addEventListener('click', function () { document.body.style.visibility = 'hidden'; location.replace('https://www.bbc.co.uk/weather'); });
   }
+
+  /* ---------- Hero: floating colour, pointer parallax, rotating word ---------- */
+  var finePointer = false;
+  try { finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches; } catch (e) {}
+  var hero = $('.hero-full');
+  if (hero) {
+    var blobs = document.createElement('div'); blobs.className = 'hero-blobs'; blobs.setAttribute('aria-hidden', 'true'); blobs.innerHTML = '<i></i><i></i><i></i>';
+    hero.insertBefore(blobs, $('.wrap', hero));
+    var heroBg = $('.bg', hero);
+    if (heroBg && finePointer && !reduceMotion) {
+      hero.addEventListener('mousemove', function (e) {
+        var r = hero.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+        heroBg.style.transform = 'translate(' + (x * -18) + 'px,' + (y * -12) + 'px)';
+      });
+      hero.addEventListener('mouseleave', function () { heroBg.style.transform = ''; });
+    }
+  }
+  var rot = $('.rotate[data-words]');
+  if (rot && !reduceMotion) {
+    var rotWords = rot.getAttribute('data-words').split(','), rotIdx = 0, rotH1 = rot.closest('h1');
+    // screen readers get the heading once, not every word change
+    if (rotH1) rotH1.setAttribute('aria-label', rotH1.textContent.replace(/\s+/g, ' ').trim());
+    setInterval(function () {
+      rot.classList.add('out');
+      setTimeout(function () { rotIdx = (rotIdx + 1) % rotWords.length; rot.textContent = rotWords[rotIdx]; rot.classList.remove('out'); }, 350);
+    }, 2800);
+  }
+
+  /* ---------- Cards: spotlight follows the pointer, photo cards tilt (mouse only) ---------- */
+  if (finePointer && !reduceMotion) {
+    $$('.card, .opp, .svc-card, .story, .feature, .dl, .job, .member').forEach(function (el) {
+      el.classList.add('spot');
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        el.style.setProperty('--mx', (e.clientX - r.left) + 'px'); el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+    $$('.reveal, .opp').forEach(function (el) {
+      el.classList.add('tilt');
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+        el.style.transform = 'perspective(900px) rotateX(' + (y * -8) + 'deg) rotateY(' + (x * 10) + 'deg) translateY(-4px)';
+      });
+      el.addEventListener('pointerleave', function () { el.style.transform = ''; });
+    });
+  }
+
+  /* ---------- Ripple on buttons ---------- */
+  if (!reduceMotion) document.addEventListener('pointerdown', function (e) {
+    var b = e.target.closest('.btn'); if (!b) return;
+    var r = b.getBoundingClientRect(), s = Math.max(r.width, r.height), rp = document.createElement('span');
+    rp.className = 'ripple'; rp.style.width = rp.style.height = s + 'px';
+    rp.style.left = (e.clientX - r.left - s / 2) + 'px'; rp.style.top = (e.clientY - r.top - s / 2) + 'px';
+    b.appendChild(rp);
+    setTimeout(function () { if (rp.parentNode) rp.parentNode.removeChild(rp); }, 650);
+  });
 
   if (single) route();
   icons();

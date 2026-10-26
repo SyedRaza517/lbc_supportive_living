@@ -100,8 +100,8 @@ p{margin:0}
 .mobile-nav a{display:block;padding:14px 0;border-bottom:1px solid var(--rule);color:var(--ink);text-decoration:none;font-weight:700;font-size:1.08rem}
 .mobile-nav a[aria-current="page"]{color:var(--accent-strong)}
 .mobile-nav .btn{margin-block:18px;width:100%;justify-content:center}
-@media (max-width:1300px){.nav,.header-cta{display:none}.menu-btn{display:inline-flex}.mobile-nav.open{display:block}}
-@media (max-width:480px){.brand span{display:none}.brand b{font-size:1.02rem}.brand svg{width:36px;height:36px}}
+@media (max-width:1439px){.nav,.header-cta{display:none}.menu-btn{display:inline-flex}.mobile-nav.open{display:block}}
+@media (max-width:480px){.brand b{font-size:1.02rem}.brand svg{width:36px;height:36px}}
 
 /* Photos */
 .ph{position:relative;margin:0;border-radius:14px;overflow:hidden;background:var(--sunk);min-width:0}
@@ -592,12 +592,10 @@ html.spaced body{letter-spacing:.03em;word-spacing:.12em;line-height:1.85}
 @media (max-width:1100px){.compare{min-width:560px}}
 [hidden]{display:none!important}
 .site-header .brand b{white-space:nowrap}
-@media (max-width:1439px){.site-header .brand span{display:none}}
 .header-cta{white-space:nowrap}
 @media (max-width:1439px){.nav a{font-size:.86rem;padding:8px 7px}}
 .site-header .wrap{max-width:none;padding-inline:clamp(16px,3vw,40px)}
 .site-header .nav{flex:1;justify-content:center;min-width:0}
-@media (min-width:1301px) and (max-width:1399px){.site-header .brand > div{display:none}}
 fieldset.step{border:0;margin:0;min-width:0}
 :root[data-theme="dark"] .fab-a11y{background:var(--teal);color:#fff}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .fab-a11y{background:var(--teal);color:#fff}}
@@ -707,3 +705,44 @@ body:has(#chatPanel:not([hidden])) .to-top{display:none}
 html.hc .topline,html.hc .band,html.hc .finder-res,html.hc .chat-head,html.hc .phead{background:#000}
 html.hc .band::before,html.hc .band::after{display:none}
 @media (prefers-reduced-motion:reduce){html.anim [data-anim]{opacity:1;transform:none}.msg.typing i{animation:none}}
+
+/* ===== v5: logo tagline and motion ===== */
+.brand b{letter-spacing:-.01em}
+.brand span{font-style:italic;font-weight:700;color:var(--accent-strong);letter-spacing:.01em}
+.site-footer .brand span{color:var(--marker)}
+
+/* Section headings: a coral rule draws in under each h2 */
+.sec-head h2::after{content:"";display:block;width:64px;height:5px;border-radius:5px;margin-top:16px;background:var(--grad-warm);transform-origin:0 50%;transition:transform .9s cubic-bezier(.2,.8,.2,1) .25s}
+html.anim .sec-head[data-anim]:not(.in) h2::after{transform:scaleX(0)}
+.band .sec-head h2::after{background:var(--sun)}
+
+/* Hero: entrance, rotating word, slow zoom, floating colour */
+.hero-copy-in > *{animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
+.hero-copy-in > :nth-child(2){animation-delay:.12s}
+.hero-copy-in > :nth-child(3){animation-delay:.24s}
+@keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.rotate{display:inline-block;background:linear-gradient(90deg,#FFC857,#FF8B5E);-webkit-background-clip:text;background-clip:text;color:transparent;transition:opacity .35s,transform .35s}
+.rotate.out{opacity:0;transform:translateY(-.35em)}
+html.hc .rotate{background:none;color:inherit}
+.hero-full .bg{transition:transform .25s ease-out}
+.hero-full .bg img{animation:kenburns 26s ease-in-out infinite alternate}
+@keyframes kenburns{from{transform:scale(1.02)}to{transform:scale(1.14) translate(-1.5%,-1%)}}
+.hero-blobs{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.hero-blobs i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.38;mix-blend-mode:screen;animation:float 18s ease-in-out infinite alternate}
+.hero-blobs i:nth-child(1){width:380px;height:380px;background:#FF8B5E;right:8%;top:-80px}
+.hero-blobs i:nth-child(2){width:300px;height:300px;background:#0D9488;right:30%;bottom:-120px;animation-duration:22s}
+.hero-blobs i:nth-child(3){width:240px;height:240px;background:#FFC857;right:-40px;bottom:20%;animation-duration:15s}
+@keyframes float{from{transform:translate(0,0) scale(1)}to{transform:translate(-60px,40px) scale(1.15)}}
+
+/* Dark bands slowly shift their gradient */
+.band{background-size:180% 180%;animation:drift 20s ease-in-out infinite alternate}
+@keyframes drift{from{background-position:0% 30%}to{background-position:100% 70%}}
+
+/* Pointer spotlight on cards, 3D tilt on photo and opportunity cards */
+.spot:is(.card,.opp,.svc-card,.story,.feature,.dl,.job,.member):hover{background-image:radial-gradient(380px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--marker) 16%,transparent),transparent 45%)}
+.tilt{transition:transform .2s ease-out,box-shadow .2s;will-change:transform}
+
+/* Button ripple */
+.btn{position:relative;overflow:hidden}
+.ripple{position:absolute;border-radius:50%;pointer-events:none;background:currentColor;opacity:.28;transform:scale(0);animation:ripple .6s ease-out forwards}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
