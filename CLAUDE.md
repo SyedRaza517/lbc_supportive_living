@@ -12,6 +12,10 @@ Content rules set by the owner:
 - Logo text is "Living by Choice" with the tagline "Growing with confidence". Nav labels are "Service Users" (→ `young-people.html`) and "Get in touch" (→ `contact.html`); file names and `data-nav` ids keep their old names on purpose.
 - No small eyebrow labels above headings (`.kicker` was removed everywhere; don't add it back). Office hours are Monday to Friday, 9am to 5pm.
 
+## Building new features
+
+For unfamiliar features, don't write from scratch: first search GitHub for open-source projects that solve the same problem, compare their approaches, then get started.
+
 ## Commands
 
 - **Preview:** open any `.html` file directly in a browser, or serve the folder with any static server.
