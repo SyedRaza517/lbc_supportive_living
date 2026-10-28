@@ -83,6 +83,15 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
   $$('[data-close]', modal).forEach(function (b) { b.addEventListener('click', closeModal); });
+  // keep Tab inside the open dialog (aria-modal promises the page behind is out of reach)
+  modal.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return;
+    var f = $$('a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])', $('.modal-card', modal)).filter(function (el) { return el.offsetParent !== null; });
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
 
   /* ---------- Copy ---------- */
   function fallbackCopy(text) {
@@ -517,6 +526,7 @@
     { k: ['family', 'parent', 'mum', 'dad', 'carer'], a: function () { return 'Families are welcome to stay involved where it is right for the person. <a href="' + L('families') + '">Information for families</a>.'; } },
     { k: ['document', 'policy', 'statement of purpose', 'brochure', 'pdf'], a: function () { return 'We can email you our Statement of Purpose and policies. <a href="' + L('about', 'policies') + '">Request a document</a>.'; } },
     { k: ['danger', 'emergency', 'unsafe', 'hurt', 'help me', 'scared'], a: function () { return '<b>If you or someone else is in danger, call 999 now.</b> You can also call Samaritans free on 116 123, day or night, or us on ' + PHONE + ' at any time.'; } },
+    { k: ['age ', 'ages ', 'how old', 'under 18', 'adult', 'eligib'], a: function () { return 'We support adults aged 18 and over. We cannot accept referrals for anyone under 18. <a href="' + L('referrals', 'ref-criteria') + '">Referral criteria</a>.'; } },
     { k: ['night', '24', 'staff', 'support'], a: function () { return 'Staff are on site 24 hours a day, every day, and every person has a named keyworker.'; } },
     { k: ['office', 'opening', 'hours', 'open'], a: function () { return 'Our office is open Monday to Friday, 9am to 5pm. Support staff are on site 24 hours a day, every day.'; } },
     { k: ['contact', 'phone', 'call', 'email', 'number'], a: function () { return 'Call ' + PHONE + ' (24 hours), mobile 07760 348767 or 07723 126345, or email ' + EMAIL + '.'; } }
@@ -526,8 +536,12 @@
     var m = document.createElement('div'); m.className = 'msg ' + (who || 'bot'); m.innerHTML = html; chatLog.appendChild(m); chatLog.scrollTop = chatLog.scrollHeight;
   }
   function answer(q) {
-    var t = q.toLowerCase(), hit = null;
-    for (var i = 0; i < KB.length && !hit; i++) { for (var j = 0; j < KB[i].k.length; j++) { if (t.indexOf(KB[i].k[j]) > -1) { hit = KB[i]; break; } } }
+    // keywords must start a word ("mum" should not match "minimum"); the entry with most keyword hits wins, ties go to the earlier one
+    var t = ' ' + q.toLowerCase().replace(/[^a-z0-9-]+/g, ' ') + ' ', hit = null, best = 0;
+    KB.forEach(function (e) {
+      var n = e.k.filter(function (k) { return t.indexOf(' ' + k) > -1; }).length;
+      if (n > best) { best = n; hit = e; }
+    });
     if (/vacanc|any space|available/.test(t)) hit = KB[1];
     if (/danger|emergency|unsafe|hurt|scared/.test(t)) hit = KB[9];
     return hit ? hit.a() : 'I’m a simple helper and can only answer common questions. For anything else, call ' + PHONE + ' (24 hours) or email ' + EMAIL + '.';
@@ -564,7 +578,17 @@
     if (!modal.hidden) { closeModal(); return; }
     if (chatPanel && !chatPanel.hidden) { togglePanel(chatBtn, chatPanel, false); chatBtn.focus(); return; }
     if (a11yPanel && !a11yPanel.hidden) { togglePanel(a11yBtn, a11yPanel, false); a11yBtn.focus(); return; }
+    // desktop dropdowns open on hover/focus, so Escape must be able to dismiss them (WCAG 1.4.13)
+    var navItem = document.activeElement && document.activeElement.closest && document.activeElement.closest('.nav-item');
+    var hovered = $$('.nav-item').filter(function (n) { return n.matches(':hover'); })[0];
+    if (navItem || hovered) { (navItem || hovered).classList.add('shut'); if (navItem) $('a', navItem).focus(); return; }
+    if (mnav && mnav.classList.contains('open')) { closeMenu(); if (menuBtn) menuBtn.focus(); return; }
     closeMenu();
+  });
+  $$('.nav-item').forEach(function (n) {
+    var reopen = function () { n.classList.remove('shut'); };
+    n.addEventListener('mouseleave', reopen);
+    n.addEventListener('focusout', function (e) { if (!n.contains(e.relatedTarget)) reopen(); });
   });
 
   /* ---------- Header shadow, reading progress, back to top ---------- */
@@ -611,6 +635,9 @@
     var m = /^(\d+)(%?)$/.exec(b.textContent.trim());
     if (!m || reduceMotion || !hasIO) return;
     var target = +m[1], suffix = m[2];
+    // screen readers and read-before-scroll get the real figure, never the animated "0%"
+    var real = document.createElement('span'); real.className = 'sr'; real.textContent = target + suffix;
+    b.parentNode.insertBefore(real, b); b.setAttribute('aria-hidden', 'true');
     b.textContent = '0' + suffix;
     var countIO = new IntersectionObserver(function (en) {
       if (!en[0].isIntersecting) return;
@@ -727,10 +754,14 @@
     var rotWords = rot.getAttribute('data-words').split(','), rotIdx = 0, rotH1 = rot.closest('h1');
     // screen readers get the heading once, not every word change
     if (rotH1) rotH1.setAttribute('aria-label', rotH1.textContent.replace(/\s+/g, ' ').trim());
-    setInterval(function () {
+    // one pass through the words, back to the first, all within 5 seconds (WCAG 2.2.2: no endless auto-updating)
+    var rotTimer = setInterval(function () {
       rot.classList.add('out');
-      setTimeout(function () { rotIdx = (rotIdx + 1) % rotWords.length; rot.textContent = rotWords[rotIdx]; rot.classList.remove('out'); }, 350);
-    }, 2800);
+      setTimeout(function () {
+        rotIdx = (rotIdx + 1) % rotWords.length; rot.textContent = rotWords[rotIdx]; rot.classList.remove('out');
+        if (rotIdx === 0) clearInterval(rotTimer);
+      }, 350);
+    }, Math.floor(5000 / rotWords.length));
   }
 
   /* ---------- Cards: spotlight follows the pointer, photo cards tilt (mouse only) ---------- */

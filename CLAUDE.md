@@ -22,6 +22,7 @@ For unfamiliar features, don't write from scratch: first search GitHub for open-
 - **Deploy (Vercel):** `vercel deploy --prod --yes` from the repo root. Project `lbc5/lbc-supportive-living`, live at https://lbc-supportive-living.vercel.app. GitHub auto-deploy is not connected yet, so deploy manually after pushing.
 - **Git:** remote is https://github.com/SyedRaza517/lbc_supportive_living (branch `main`). On this machine Git was installed mid-session; if `git` is not on PATH, use `& "$env:ProgramFiles\Git\cmd\git.exe"`.
 - `.vercel/` and `.env*` (Vercel OIDC token) are gitignored. Never commit them.
+- `vercel.json` sets security headers, including a Content-Security-Policy that only allows scripts from this site and `unpkg.com/lucide@0.344.0/`, styles from Google Fonts, and no iframes/embeds. Adding any new external script, font, image host or embed (e.g. a map iframe) means updating the CSP too, or the browser silently blocks it. The Lucide `<script>` carries an SRI `integrity` hash: change the version and the hash together on all 19 pages.
 
 ## Architecture
 

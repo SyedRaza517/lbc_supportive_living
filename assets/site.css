@@ -53,6 +53,7 @@ p{margin:0}
 .u{background:linear-gradient(transparent 62%,color-mix(in srgb,var(--marker) 55%,transparent) 62% 92%,transparent 92%);-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .skip{position:absolute;left:12px;top:-80px;background:var(--navy);color:var(--on-navy);padding:10px 14px;z-index:99;border-radius:var(--r)}
 .skip:focus{top:12px}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .wrap{max-width:var(--wrap);margin-inline:auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
 .sec{padding-block:clamp(56px,8vw,96px)}
 .sec.tint{background:var(--sunk)}
@@ -319,7 +320,7 @@ i[data-lucide]{display:inline-flex}
 .hero-full .kicker::before{background:var(--marker)}
 .hero-full .btn-line{border-color:#fff;color:#fff}
 .hero-full .btn-line:hover{background:#fff;color:var(--navy)}
-.hero-full figcaption{position:absolute;right:12px;bottom:10px;font-size:.72rem;color:#fff;background:rgba(30,20,60,.62);padding:3px 9px;border-radius:999px;z-index:2}
+.hero-full .hero-credit{position:absolute;right:12px;bottom:10px;font-size:.72rem;color:#fff;background:rgba(30,20,60,.62);padding:3px 9px;border-radius:999px;z-index:2}
 .hero-side{display:grid;gap:14px;justify-items:end}
 .call-card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:14px;padding:18px 20px;display:grid;gap:4px;min-width:min(280px,100%)}
 .call-card .num{font-size:1.6rem;font-weight:800;color:#fff}
@@ -746,3 +747,7 @@ html.hc .rotate{background:none;color:inherit}
 .btn{position:relative;overflow:hidden}
 .ripple{position:absolute;border-radius:50%;pointer-events:none;background:currentColor;opacity:.28;transform:scale(0);animation:ripple .6s ease-out forwards}
 @keyframes ripple{to{transform:scale(4);opacity:0}}
+
+/* Escape dismisses an open dropdown until the pointer or focus leaves it */
+.nav-item.shut .sub{opacity:0;visibility:hidden}
+.nav-item.shut .caret{transform:none}
